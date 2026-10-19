@@ -1,170 +1,137 @@
 # 📚 Book Recommender
 
-A book recommendation system project focused on data analysis, data preprocessing, semantic search, and personalized book recommendations.
+A book recommendation project built with Python, Pandas, sentence embeddings, and ChromaDB. The project uses book descriptions to retrieve semantically relevant books from natural-language queries.
 
-This project serves as a hands-on learning experience in Python, data science, and machine learning, with the long-term goal of developing an intelligent book recommendation system powered by vector search and Large Language Models (LLMs).
+**Project Status:** Data preparation and a local semantic-search prototype are working. The recommendation function and user interface are still in development.
 
-## 🎯 Project Objectives
+## 🚀 Current Features
 
-- Explore and understand real-world book metadata.
-- Perform data cleaning and exploratory data analysis (EDA).
-- Identify patterns and relationships between book attributes.
-- Prepare book descriptions and metadata for vector search.
-- Implement semantic search to retrieve books based on the meaning of a query.
-- Explore content-based recommendation techniques.
-- Investigate how LLMs can improve personalized book recommendations.
+- Explored a book metadata dataset containing approximately 7,000 books.
+- Cleaned and prepared book metadata using Pandas.
+- Filtered out books with descriptions containing 25 words or fewer.
+- Created a `title_and_subtitle` column, using the title alone when a subtitle is unavailable.
+- Created a `tagged_description` column combining each book's ISBN-13 and description, separated by a space.
+- Exported cleaned book data to `books_cleaned.csv`.
+- Exported ISBN-tagged descriptions to `tagged_description.txt`.
+- Loaded text data using LangChain's `TextLoader`.
+- Converted individual book descriptions into LangChain `Document` objects.
+- Generated text embeddings locally using `sentence-transformers/all-MiniLM-L6-v2`.
+- Built a ChromaDB vector database for semantic search.
+- Tested semantic search using natural-language queries and retrieved the top five matching documents.
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-### Currently Used
 - **Python** — Core programming language
-- **Pandas** — Data manipulation and analysis
-- **NumPy** — Numerical computing
-- **Matplotlib / Seaborn** — Data visualization
-- **Jupyter Notebook** — Interactive data exploration
+- **Pandas** — Data cleaning and manipulation
+- **Jupyter Notebook** — Data exploration and experimentation
+- **LangChain** — Document loading and embedding integration
+- **Sentence Transformers** — Local text embedding model
+- **ChromaDB** — Vector storage and semantic similarity search
 
-### Planned Technologies
-- **Scikit-learn** — Machine learning and similarity-based retrieval
-- **Vector Search** — Semantic retrieval using numerical representations of book descriptions
-- **LLMs** — Natural-language understanding and recommendation generation
+## ⚙️ How It Works
 
-*Planned technologies may change as the project develops.*
+The current project follows this workflow:
 
-## 📊 Dataset
+1. **Data Exploration:** Explore the book metadata dataset using Pandas.
+2. **Data Cleaning:** Clean the dataset and filter out books with insufficient descriptions.
+3. **Text Preparation:** Combine each book's ISBN-13 with its description.
+4. **Data Export:** Save the cleaned metadata and tagged descriptions to separate files.
+5. **Document Loading:** Load the tagged descriptions and create individual documents for each book.
+6. **Embedding Generation:** Convert book descriptions into numerical representations using a local embedding model.
+7. **Vector Database:** Store the documents and embeddings in ChromaDB.
+8. **Semantic Search:** Retrieve books whose descriptions are semantically similar to a user's natural-language query.
 
-This project uses the **7k Books with Metadata** dataset from Kaggle.
+### Example Query
 
-**Original dataset:** [7k Books with Metadata — Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
+```python
+query = "A story about friendship, magic, and adventure"
 
-The repository includes `books_cleaned.csv`, a preprocessed version of the dataset prepared for further analysis and future vector search experiments.
-
-### Data Preparation
-
-The preprocessing workflow includes:
-
-- Filtering out books whose descriptions contain 25 words or fewer.
-- Creating a `title_and_subtitle` column that combines the title and subtitle, using the title alone when the subtitle is missing.
-- Creating a column that combines the ISBN-13 identifier and book description for future indexing and retrieval.
-- Tracking the word count of each book description.
-- Removing columns considered unnecessary for the current stage of analysis.
-- Exporting the cleaned dataset to CSV using `index=False` to prevent the DataFrame index from being saved as an additional column.
-
-### Exploratory Data Analysis
-
-The notebook also explores:
-
-- Dataset structure and column data types.
-- Missing values in book metadata.
-- Book titles, subtitles, and descriptions.
-- Numerical features such as page count and average rating.
-- Relationships between numerical variables using Spearman correlation.
-
-## 📈 Current Progress
-
-### Completed
-
-- [x] Explored the book metadata dataset.
-- [x] Investigated missing values and column data types.
-- [x] Analyzed relationships between numerical features using Spearman correlation.
-- [x] Filtered books based on description length.
-- [x] Created a combined title-and-subtitle field with missing-subtitle handling.
-- [x] Prepared a combined ISBN-13 and description field for future retrieval.
-- [x] Added description word-count tracking.
-- [x] Removed unnecessary columns from the final dataset.
-- [x] Exported the preprocessed data to `books_cleaned.csv`.
-
-### Next Steps
-
-- [ ] Review the cleaned dataset for remaining data quality issues.
-- [ ] Generate vector embeddings from book descriptions and relevant metadata.
-- [ ] Build a vector index for efficient similarity search.
-- [ ] Implement semantic search using natural-language queries.
-- [ ] Evaluate search relevance and retrieval quality.
-- [ ] Develop a baseline content-based recommendation system.
-- [ ] Explore LLM integration for more contextual and personalized recommendations.
-
-## 📁 Repository Structure
-
-```text
-book-recommender/
-├── books_cleaned.csv       # Preprocessed book dataset
-├── data-exploration.ipynb  # Data cleaning and exploratory analysis
-├── .gitignore              # Files excluded from version control
-└── README.md               # Project documentation
+results = "db_books.similarity_search(query, k=5)"
 ```
 
-The repository structure may evolve as the project expands to include embedding generation, vector indexing, and recommendation functionality.
+This query retrieves up to five book descriptions related to the requested themes.
 
-## 🚀 Getting Started
+Unlike a simple keyword search, semantic search can identify relevant descriptions even when they use different words to express similar ideas.
 
-### Prerequisites
+## 🧠 Local Embeddings
 
-- Python 3.10 or a compatible version
-- Git
-- Jupyter Notebook or an IDE that supports notebooks
+This project uses the following model:
 
-### 1. Clone the repository
+`sentence-transformers/all-MiniLM-L6-v2`
+
+The model is integrated through LangChain's `HuggingFaceEmbeddings` and generates embeddings locally.
+
+This approach avoids paid OpenAI API calls for the current embedding and semantic-retrieval workflow.
+
+The initial model download requires an internet connection. Once downloaded, the model can generate embeddings locally without requiring an OpenAI API key.
+
+## 📂 Project Files
+
+| File | Description |
+|---|---|
+| `books_cleaned.csv` | Cleaned book metadata for retrieving book information |
+| `tagged_description.txt` | Book descriptions prefixed with ISBN-13 identifiers, used for semantic search |
+| `data-exploration.ipynb` | Notebook for exploring and preparing the dataset, if present |
+| Semantic-search notebook | Notebook for loading documents, generating embeddings, building ChromaDB, and testing retrieval |
+
+File names and notebook organization may change as the project develops.
+
+## 📦 Installation
+
+Install the required Python packages in your project environment:
 
 ```bash
-git clone https://github.com/Jamess-Nicc/book-recommender.git
-cd book-recommender
+python -m pip install pandas jupyter langchain-community langchain-core langchain-huggingface langchain-chroma sentence-transformers
 ```
 
-### 2. Create a virtual environment
+If you're using PyCharm, make sure your notebook kernel uses the same Python interpreter or virtual environment where the packages are installed.
 
-```bash
-python -m venv .venv
-```
+## ⚠️ Current Limitations
 
-Activate the environment on Windows:
+- The system retrieves relevant book descriptions but does not yet present fully developed book recommendations.
+- Retrieved ISBNs have not yet been integrated into a complete recommendation function.
+- Recommendation ranking and presentation logic are still in development.
+- A user-facing interface has not yet been implemented.
+- The current ChromaDB setup uses an in-memory collection unless persistence is configured separately.
+- Recommendation relevance and overall system performance still require further testing.
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+## 🗺️ Roadmap
 
-### 3. Install dependencies
+- [x] Explore and clean the book metadata dataset.
+- [x] Prepare ISBN-tagged book descriptions.
+- [x] Generate local text embeddings.
+- [x] Build a ChromaDB vector database.
+- [x] Test semantic search with natural-language queries.
+- [ ] Rebuild and verify the corrected document collection.
+- [ ] Connect retrieved ISBNs to the corresponding book metadata.
+- [ ] Implement a reusable book recommendation function.
+- [ ] Improve recommendation ranking and filtering.
+- [ ] Continue implementing the recommendation pipeline.
+- [ ] Build a user-friendly interface.
+- [ ] Test and evaluate recommendation quality.
 
-```bash
-python -m pip install pandas numpy matplotlib seaborn jupyter
-```
+## 🎯 Learning Objectives
 
-### 4. Open the notebook
+This project is a practical learning experience focused on:
 
-```bash
-jupyter notebook data-exploration.ipynb
-```
+- Python programming
+- Data cleaning and manipulation with Pandas
+- Natural-language processing
+- Text embeddings and semantic similarity
+- Vector databases and information retrieval
+- Building applications with LangChain
+- Integrating machine-learning components into a usable application
 
-Alternatively, open `data-exploration.ipynb` directly in PyCharm or another compatible notebook editor.
+## 📖 Dataset
 
-The notebook may contain dataset paths specific to the development environment. Update those paths if necessary to point to the appropriate local files.
+The project uses the **7k Books with Metadata** dataset from Kaggle.
 
-## 🧠 Learning Goals
-
-This project is intended to strengthen my understanding of:
-
-- Data cleaning and preprocessing
-- Feature engineering
-- Exploratory data analysis and statistical correlation
-- Vector embeddings and semantic search
-- Similarity measures and information retrieval
-- Content-based recommendation systems
-- Natural language processing
-- LLM integration and AI-assisted recommendations
+Dataset: [7k Books with Metadata — Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
 
 ## 📌 Project Status
 
-**Status:** In Development — Data Preparation Completed for the Current Iteration
+The project has progressed from data exploration and preparation to a working semantic-search prototype using local embeddings and ChromaDB.
 
-The initial data exploration and preprocessing workflow has been implemented. The next major milestone is building a vector search pipeline to retrieve books based on the semantic meaning of their descriptions.
+The next milestone is to connect search results to complete book metadata and implement the core recommendation function.
 
-Future development will focus on improving retrieval quality and exploring LLM-assisted book recommendations.
-
-## 👨‍💻 Author
-
-**James Nicdao**
-
-Full-Stack Developer | Python | TypeScript | Vue.js | SQL | Machine Learning
-
----
-
-*An ongoing learning project exploring the foundations of intelligent book search and recommendation systems.*
+The long-term goal is to build a book recommendation application that accepts natural-language preferences and returns relevant books from the dataset.
