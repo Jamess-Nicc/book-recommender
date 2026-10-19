@@ -106,7 +106,7 @@ The repository structure may evolve as the project expands to include embedding 
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/Jamess-Nicc/book-recommender.git
 cd book-recommender
 ```
 
