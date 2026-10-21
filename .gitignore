@@ -1,29 +1,24 @@
-
-# Python virtual environment
-.venv/
-venv/
-
-# PyCharm settings
-.idea/
-
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
+.venv/
+venv/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
 
-# Secrets
+# ChromaDB vector databases
+chroma.db/
+chroma_db/
+
+# Environment variables and secrets
 .env
 .env.*
 
-# Local datasets
-.cache/
-data/
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
 
-# Model artifacts
-models/
-*.pkl
-*.joblib
-*.pt
-*.pth
+# IDE files
+.idea/
+.vscode/

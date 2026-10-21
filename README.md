@@ -1,323 +1,318 @@
-# 📚 Book Recommender
+# Book Recommender
 
-A book recommendation project built with Python, Pandas, LangChain, Hugging Face sentence embeddings, and ChromaDB. The project uses semantic search to recommend books based on the meaning of a user's query rather than relying exclusively on keyword matching.
+A full-stack semantic book recommendation application built as a hands-on learning project. It combines data cleaning and exploration with local text embeddings, vector similarity search, a Python API, and a Vue web interface.
 
-This project is part of my journey into data analytics, machine learning, and natural language processing.
+The project is inspired by the tutorial **"Build a Semantic Book Recommender with LLMs"** and uses the **7k Books with Metadata** dataset from Kaggle.
 
-## 🎯 Project Goals
+## Current Features
 
-The primary goal is to build a book recommendation system that understands natural-language queries and retrieves relevant books from a dataset of book descriptions.
+- **Data exploration and cleaning** with Pandas in Jupyter Notebook.
+- Filters out book descriptions containing 25 words or fewer.
+- Creates a `title_and_subtitle` field, falling back to the title when a subtitle is missing.
+- Creates ISBN-tagged descriptions to connect semantic-search results to book metadata.
+- Uses the local Hugging Face embedding model `sentence-transformers/all-MiniLM-L6-v2`.
+- Stores book-description documents and embeddings in ChromaDB for semantic similarity search.
+- Provides a reusable recommendation function in `backend/recommender.py`.
+- Maps retrieved ISBNs to book metadata, including titles, authors, categories, descriptions, thumbnails, and average ratings.
+- Supports recommendation settings such as the number of results and minimum rating.
+- Exposes a FastAPI backend with `/api/health` and `/api/recommend` endpoints.
+- Includes a Vue 3 + TypeScript frontend built with Vite.
+- Displays recommended books through a card-based interface.
+- Includes loading and error states in the frontend.
+- Uses a Vite development proxy to route `/api` requests to the FastAPI backend.
 
-The project explores:
+## Technology Stack
 
-- Data cleaning and preprocessing
-- Exploratory data analysis (EDA)
-- Semantic search and vector embeddings
-- Vector databases and similarity search
-- Recommendation ranking
-- Filtering recommendations using book metadata
-- Natural-language processing (NLP)
+### Data Processing and Recommendation Engine
+- Python
+- Pandas
+- Jupyter Notebook
+- LangChain
+- Hugging Face Sentence Transformers
+- `sentence-transformers/all-MiniLM-L6-v2`
+- ChromaDB
 
-## 📊 Dataset
+### Backend
+- FastAPI
+- Uvicorn
+- Pydantic
 
-**Dataset:** [7k Books with Metadata](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
+### Frontend
+- Vue 3
+- TypeScript
+- Vite
+- HTML and CSS
 
-The dataset contains book metadata, including titles, authors, categories, descriptions, publication years, ratings, page counts, and ISBN identifiers.
+## Dataset
 
-After preprocessing, the project contains **5,197 books with usable descriptions**.
+The project uses the **[7k Books with Metadata dataset](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)** from Kaggle.
 
-## 🛠️ Technology Stack
+The cleaned dataset currently contains **5,197 books**.
 
-| Technology | Purpose |
-|---|---|
-| Python | Core programming language |
-| Pandas | Data manipulation and preprocessing |
-| Jupyter Notebook | Interactive development and experimentation |
-| LangChain | Document processing and embedding integration |
-| Hugging Face | Local sentence embedding model |
-| Sentence Transformers | Generating semantic embeddings |
-| ChromaDB | Vector storage and similarity search |
-| Git and GitHub | Version control and project documentation |
+### Data Preparation
 
-### Embedding Model
+The data preparation process includes:
 
-The project uses the pretrained model:
+1. Exploring the original dataset using Pandas.
+2. Inspecting missing values and summary statistics.
+3. Filtering out descriptions containing 25 words or fewer.
+4. Creating `title_and_subtitle`, using the title when a subtitle is unavailable.
+5. Creating `tagged_description` by combining the ISBN-13 and book description.
+6. Exporting the cleaned metadata and tagged descriptions for use by the recommendation pipeline.
 
-`sentence-transformers/all-MiniLM-L6-v2`
+### Important Data Files
 
-The model generates vector embeddings locally, avoiding the need for a paid OpenAI API for the current semantic-search implementation.
+- `books_cleaned.csv` — cleaned book metadata used to retrieve book details.
+- `tagged_description.txt` — ISBN-tagged descriptions used to build the vector database.
+- `data-exploration.ipynb` — notebook for data exploration and preparation.
+- `chroma.db` or the configured ChromaDB persistence directory — local vector database, depending on the configured storage path.
 
-## ✅ Completed Work
+File locations may vary depending on the current project configuration.
 
-### 1. Data Exploration and Cleaning
+## How Semantic Search Works
 
-- Inspected the dataset's columns and data types.
-- Explored book ratings and other numerical variables.
-- Examined missing values.
-- Investigated relationships between numerical variables using Spearman correlation.
-- Filtered out books with descriptions containing 25 words or fewer.
-- Created a `title_and_subtitle` field that uses the title alone when a subtitle is unavailable.
-- Created a `tagged_description` field combining each book's ISBN-13 identifier and description.
-- Exported the cleaned dataset to `books_cleaned.csv`.
-- Exported the tagged descriptions to `tagged_description.txt`.
+The recommendation pipeline follows these steps:
 
-### 2. Local Embeddings
+1. The embedding model converts book descriptions into numerical vectors.
+2. ChromaDB stores the documents and their embeddings.
+3. A user submits a natural-language query, such as `"a story about friendship, magic, and adventure"`.
+4. ChromaDB retrieves book descriptions that are semantically similar to the query.
+5. The recommendation function extracts ISBNs from the retrieved documents.
+6. The ISBNs are used to retrieve the corresponding book metadata while preserving the relevance order returned by ChromaDB.
+7. FastAPI returns the recommendations as JSON.
+8. Vue displays the recommended books in the user interface.
 
-Integrated a pretrained Sentence Transformers model through LangChain's Hugging Face embedding integration.
+This implementation uses **semantic retrieval through embeddings and vector similarity**. It does not currently depend on an LLM generating recommendations from scratch.
 
-The embedding model converts book descriptions into numerical vectors that represent semantic meaning, enabling retrieval based on conceptual relevance rather than exact keyword matches.
+## Project Structure
 
-### 3. ChromaDB Vector Database
+The project is organized approximately as follows. Actual filenames and storage locations may differ slightly as development continues.
 
-- Created LangChain documents from the tagged descriptions.
-- Built a ChromaDB vector database using the local embedding model.
-- Indexed all **5,197 cleaned book documents**.
-- Tested similarity searches using natural-language queries.
-- Confirmed that the database returns relevant book descriptions.
-
-### 4. Semantic Book Search
-
-Implemented semantic search using ChromaDB's similarity-search functionality.
-
-Example query:
-
-```python
-# Example query — replace this string with your own search.
-query = "A story about friendship, magic, and adventure"
-
-# Example search — requires db_books to be initialized.
-# results = db_books.similarity_search(query, k=5)
+```text
+book-recommender/
+├── backend/
+│   ├── main.py
+│   ├── recommender.py
+│   └── test_recommender.py
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── src/
+│       └── App.vue
+├── books_cleaned.csv
+├── tagged_description.txt
+├── data-exploration.ipynb
+└── chroma.db
 ```
 
-The system retrieves book descriptions that are semantically relevant to the query.
+The ChromaDB database may instead be stored in a configured persistence directory.
 
-### 5. Book Recommendation Function
+## Installation and Setup
 
-Developed a `recommend_books()` function that connects semantic-search results to the original Pandas metadata.
-
-The function:
-
-- Accepts a natural-language query.
-- Retrieves relevant books from ChromaDB.
-- Extracts ISBN-13 identifiers from search results.
-- Matches identifiers against the cleaned dataset.
-- Preserves ChromaDB's relevance ranking.
-- Returns selected metadata in a Pandas DataFrame.
-
-The returned information includes:
-
-- ISBN-13
-- Title
-- Authors
-- Categories
-- Description
-- Thumbnail
-- Average rating
-
-Example usage:
-
-```python
-# Example call — requires the recommend_books() function to be defined.
-# recommendations = recommend_books(
-#     query="A fantasy story about magic and friendship",
-#     k=5
-# )
-```
-
-### 6. Minimum-Rating Filter
-
-Extended the recommendation function with an optional `min_rating` parameter.
-
-Example usage:
-
-```python
-# Example: Recommend up to five books rated 4.0 or higher.
-# recommendations = recommend_books(
-#     query="A fantasy story about magic and friendship",
-#     k=5,
-#     min_rating=4.0
-# )
-```
-
-A stricter rating requirement can also be used:
-
-```python
-# Example: Recommend books rated 4.5 or higher.
-# recommendations = recommend_books(
-#     query="A fantasy story about magic and friendship",
-#     k=5,
-#     min_rating=4.5
-# )
-```
-
-The rating filter is optional. When `min_rating=None`, the function does not filter recommendations by rating.
-
-The function retrieves up to five times the requested number of candidates to improve the chances of finding enough books that satisfy the rating requirement. Consequently, it may return fewer than the requested number of books when too few candidates qualify.
-
-## ⚙️ Current Recommendation Workflow
-
-The current system follows this workflow:
-
-1. The user enters a natural-language query.
-2. The embedding model represents the query for semantic search.
-3. ChromaDB retrieves books with semantically similar descriptions.
-4. ISBN-13 identifiers connect search results to the cleaned Pandas dataset.
-5. The recommendation function retrieves the relevant metadata.
-6. An optional minimum-rating filter removes books below the requested threshold.
-7. The function returns recommendations in semantic relevance order.
-
-## 📁 Project Files
-
-| File | Description |
-|---|---|
-| `data-exploration.ipynb` | Notebook containing data exploration, preprocessing, embeddings, vector search, and recommendation experiments |
-| `books_cleaned.csv` | Cleaned book metadata |
-| `tagged_description.txt` | ISBN-tagged book descriptions used to create the vector database |
-| `README.md` | Project documentation |
-| `.gitignore` | Specifies files and directories Git should ignore |
-
-The vector database is generated during development and may need to be rebuilt if its persisted files are not included in the repository.
-
-## 🚀 Setup and Installation
-
-### Prerequisites
+### Requirements
 
 - Python
-- Jupyter Notebook
-- Git
+- Node.js and npm
+- A Python virtual environment
+- Internet access for installing packages and initially downloading the embedding model
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Jamess-Nicc/book-recommender.git
 cd book-recommender
 ```
 
-Replace `<your-repository-url>` with the URL of your GitHub repository.
+If the repository is already on your computer, open a terminal in the existing project directory instead.
 
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv .venv
-```
+### 2. Create a Python Virtual Environment
 
 On Windows PowerShell:
 
 ```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 3. Install Dependencies
+If you already have a working virtual environment, activate that environment instead.
+
+### 3. Install Python Dependencies
 
 ```bash
-pip install pandas jupyter langchain-community langchain-core langchain-huggingface langchain-chroma sentence-transformers
+python -m pip install pandas jupyter fastapi "uvicorn[standard]" langchain-community langchain-core langchain-huggingface langchain-chroma sentence-transformers
 ```
 
-### 4. Launch Jupyter Notebook
+If the project has a maintained `requirements.txt`, use that file to install the project's dependencies instead.
 
-```bash
-jupyter notebook
+### 4. Install Frontend Dependencies
+
+```powershell
+cd frontend
+npm install
 ```
 
-Open `data-exploration.ipynb` and execute the notebook cells in order.
+Return to the project root before starting the backend:
 
-**Note:** The first embedding-model initialization may require an internet connection to download the pretrained model. Subsequent runs can use the locally cached model.
+```powershell
+cd ..
+```
 
-The notebook and generated data files must be available at the paths expected by the code.
+## Running the Application
 
-## 🔄 Current Project Status
+The frontend and backend must run in separate terminal windows during local development.
 
-**Status: Working semantic-search and metadata-based recommendation prototype.**
+### Terminal 1: Start the Backend
 
-| Component | Status |
-|---|---|
-| Dataset exploration | Completed |
-| Data cleaning and preprocessing | Completed |
-| Cleaned CSV and tagged-description exports | Completed |
-| Local embedding model integration | Completed |
-| ChromaDB indexing | Completed |
-| Semantic similarity search | Working |
-| ISBN-based metadata retrieval | Working |
-| Recommendation function | Working |
-| Optional minimum-rating filter | Implemented and tested |
-| Category filtering | Planned |
-| Publication-year filtering | Planned |
-| Page-count filtering | Planned |
-| Combined recommendation filters | Planned |
-| User interface | Planned |
-| End-to-end application | In development |
+From the project root, with the Python virtual environment activated:
 
-## 🗺️ Roadmap
+```powershell
+python -m uvicorn main:app --app-dir backend --reload --port 8001
+```
 
-### Phase 1: Data Preparation
+The backend runs locally on port `8001`.
 
-- [x] Explore the dataset.
-- [x] Clean book metadata and descriptions.
-- [x] Generate tagged descriptions.
-- [x] Export the cleaned dataset.
+Available development endpoints:
 
-### Phase 2: Semantic Search
+- Health check: `http://127.0.0.1:8001/api/health`
+- Interactive API documentation: `http://127.0.0.1:8001/docs`
 
-- [x] Integrate a local sentence embedding model.
-- [x] Convert book descriptions into LangChain documents.
-- [x] Build the ChromaDB vector database.
-- [x] Test semantic similarity search.
+The backend must be able to access the cleaned metadata and ChromaDB database at the paths configured in the code.
 
-### Phase 3: Recommendation Logic
+### Terminal 2: Start the Frontend
 
-- [x] Connect search results to book metadata using ISBN-13.
-- [x] Implement the `recommend_books()` function.
-- [x] Preserve semantic relevance ranking.
-- [x] Add an optional minimum-rating filter.
-- [ ] Add category filtering.
-- [ ] Add publication-year filtering.
-- [ ] Add page-count filtering.
-- [ ] Support combinations of filters.
-- [ ] Improve recommendation quality and evaluation.
+```powershell
+cd frontend
+npm run dev
+```
 
-### Phase 4: User Experience
+Open the local URL provided by Vite.
 
-- [ ] Design a user-friendly interface.
-- [ ] Display book covers and relevant metadata.
-- [ ] Allow users to search using natural language.
-- [ ] Add controls for recommendation filters.
-- [ ] Integrate the recommendation function into the interface.
+The current development configuration uses:
 
-### Phase 5: Evaluation and Improvements
+```text
+http://localhost:5175
+```
 
-- [ ] Test the system using different types of queries.
-- [ ] Evaluate recommendation relevance.
-- [ ] Improve handling of empty or insufficient results.
-- [ ] Optimize retrieval and response time.
-- [ ] Document limitations and future improvements.
+The Vite development proxy forwards requests beginning with `/api` to the FastAPI backend at `http://127.0.0.1:8001`.
 
-## 📚 Learning Objectives
+## API Endpoints
+
+### `GET /api/health`
+
+Checks whether the backend is running.
+
+### `POST /api/recommend`
+
+Accepts a natural-language query and recommendation settings, then returns matching book records.
+
+Depending on the current backend schema, the request can include:
+
+- `query` — the user's natural-language search query.
+- `k` — the requested number of recommendations.
+- `min_rating` — the optional minimum average rating.
+
+Example request body:
+
+```json
+{
+  "query": "a story about friendship, magic, and adventure",
+  "k": 5,
+  "min_rating": 0
+}
+```
+
+The exact request fields and validation rules are defined by the current FastAPI implementation.
+
+The response contains a list of recommendations with book metadata used by the frontend.
+
+## Local Embeddings
+
+The project uses the Hugging Face model:
+
+`sentence-transformers/all-MiniLM-L6-v2`
+
+The model is loaded through LangChain's `HuggingFaceEmbeddings` integration.
+
+Because embeddings are generated locally, the project does not require a paid OpenAI embedding API or an OpenAI API key for its current semantic-search pipeline.
+
+The initial model download requires internet access. Authentication is generally unnecessary for this public model, although Hugging Face may display an informational warning about unauthenticated requests.
+
+## Testing and Troubleshooting
+
+### `npm` Reports `ENOENT`
+
+This usually means npm cannot find a required file, such as `package.json`, in the current directory.
+
+**Solution:** Run frontend commands from the `frontend` directory.
+
+### The Frontend Loads but Search Fails
+
+Check the following:
+
+1. Confirm that the FastAPI backend is running.
+2. Confirm that the backend is listening on port `8001`.
+3. Open the browser's Developer Tools and inspect the Console and Network panels.
+4. Check the backend terminal for errors.
+5. Verify that the API endpoint and request fields match the frontend code.
+
+### The Backend Cannot Find the Dataset or Database
+
+Check that:
+
+- The cleaned CSV exists.
+- The ChromaDB database has been built.
+- The paths configured in the backend match the actual file locations.
+- The application is being started from the expected working directory.
+
+### Python Reports `NameError`
+
+A `NameError` can occur when a variable, function, or class has not been defined or imported before it is used.
+
+In Jupyter Notebook, restart the kernel and run the cells in order if execution order has become inconsistent.
+
+### Duplicate Search Results
+
+Compare the total number of stored documents against the number of unique IDs and unique document contents.
+
+Previously, the database contained 10,394 documents but only 5,197 unique descriptions, indicating duplicate entries. The database was rebuilt and verified to contain 5,197 documents.
+
+Before deleting or rebuilding a persistent vector database, confirm its configured storage location and whether its contents need to be preserved.
+
+### Rating Filtering Returns Fewer Results Than Requested
+
+If the recommender retrieves only `k` candidates and then applies a minimum-rating filter, some candidates may be removed.
+
+A potential improvement is to retrieve a larger candidate pool before filtering, allowing the application to return the requested number of recommendations when enough suitable matches exist.
+
+## Current Limitations and Future Improvements
+
+This is an active learning project. Potential improvements include:
+
+- Evaluate recommendation quality using a consistent collection of test queries.
+- Improve candidate retrieval and minimum-rating filtering.
+- Improve handling of missing book-cover images and incomplete metadata.
+- Expand automated tests for API validation, recommendation ordering, and edge cases.
+- Improve production configuration for API routing and deployment.
+- Make dataset and vector database paths configurable through environment variables.
+- Explore optional LLM-powered explanations or summaries after the retrieval pipeline is stable.
+
+## Learning Goals
 
 This project provides practical experience with:
 
-- Data cleaning and exploratory data analysis
-- Pandas DataFrame operations
-- Natural-language processing
-- Sentence embeddings
-- Vector databases
-- Semantic similarity search
-- LangChain document processing
-- Metadata-based recommendation filtering
-- Building an end-to-end machine learning application
+- Data cleaning and exploratory data analysis using Pandas.
+- Text preparation and identifier-based metadata lookup.
+- Text embeddings and semantic similarity.
+- Vector databases and information retrieval.
+- Python module organization and testing.
+- REST API development with FastAPI.
+- Frontend development with Vue 3 and TypeScript.
+- Connecting a frontend to a Python backend.
+- Debugging a full-stack application.
 
-## 🔮 Future Possibilities
+## Acknowledgements
 
-Potential future improvements include:
+- **Dataset:** [7k Books with Metadata — Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
+- **Tutorial inspiration:** [Build a Semantic Book Recommender with LLMs — freeCodeCamp](https://youtu.be/Q7mS1VHm3Yw?si=8Os6jP2P3AKcFAIG)
 
-- More advanced recommendation strategies
-- Improved ranking using multiple metadata signals
-- Better book discovery through combined semantic and metadata filters
-- Recommendation explanations
-- A web-based interface
-- Evaluation using recommendation metrics
-
-These are future possibilities rather than currently implemented features.
-
-## 👨‍💻 Project Status and Development
-
-This is an actively developed learning and portfolio project. Its current focus is building a functional semantic book recommendation system using local embeddings and a vector database.
+---
