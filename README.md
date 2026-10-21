@@ -1,137 +1,323 @@
 # 📚 Book Recommender
 
-A book recommendation project built with Python, Pandas, sentence embeddings, and ChromaDB. The project uses book descriptions to retrieve semantically relevant books from natural-language queries.
+A book recommendation project built with Python, Pandas, LangChain, Hugging Face sentence embeddings, and ChromaDB. The project uses semantic search to recommend books based on the meaning of a user's query rather than relying exclusively on keyword matching.
 
-**Project Status:** Data preparation and a local semantic-search prototype are working. The recommendation function and user interface are still in development.
+This project is part of my journey into data analytics, machine learning, and natural language processing.
 
-## 🚀 Current Features
+## 🎯 Project Goals
 
-- Explored a book metadata dataset containing approximately 7,000 books.
-- Cleaned and prepared book metadata using Pandas.
-- Filtered out books with descriptions containing 25 words or fewer.
-- Created a `title_and_subtitle` column, using the title alone when a subtitle is unavailable.
-- Created a `tagged_description` column combining each book's ISBN-13 and description, separated by a space.
-- Exported cleaned book data to `books_cleaned.csv`.
-- Exported ISBN-tagged descriptions to `tagged_description.txt`.
-- Loaded text data using LangChain's `TextLoader`.
-- Converted individual book descriptions into LangChain `Document` objects.
-- Generated text embeddings locally using `sentence-transformers/all-MiniLM-L6-v2`.
-- Built a ChromaDB vector database for semantic search.
-- Tested semantic search using natural-language queries and retrieved the top five matching documents.
+The primary goal is to build a book recommendation system that understands natural-language queries and retrieves relevant books from a dataset of book descriptions.
+
+The project explores:
+
+- Data cleaning and preprocessing
+- Exploratory data analysis (EDA)
+- Semantic search and vector embeddings
+- Vector databases and similarity search
+- Recommendation ranking
+- Filtering recommendations using book metadata
+- Natural-language processing (NLP)
+
+## 📊 Dataset
+
+**Dataset:** [7k Books with Metadata](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
+
+The dataset contains book metadata, including titles, authors, categories, descriptions, publication years, ratings, page counts, and ISBN identifiers.
+
+After preprocessing, the project contains **5,197 books with usable descriptions**.
 
 ## 🛠️ Technology Stack
 
-- **Python** — Core programming language
-- **Pandas** — Data cleaning and manipulation
-- **Jupyter Notebook** — Data exploration and experimentation
-- **LangChain** — Document loading and embedding integration
-- **Sentence Transformers** — Local text embedding model
-- **ChromaDB** — Vector storage and semantic similarity search
+| Technology | Purpose |
+|---|---|
+| Python | Core programming language |
+| Pandas | Data manipulation and preprocessing |
+| Jupyter Notebook | Interactive development and experimentation |
+| LangChain | Document processing and embedding integration |
+| Hugging Face | Local sentence embedding model |
+| Sentence Transformers | Generating semantic embeddings |
+| ChromaDB | Vector storage and similarity search |
+| Git and GitHub | Version control and project documentation |
 
-## ⚙️ How It Works
+### Embedding Model
 
-The current project follows this workflow:
-
-1. **Data Exploration:** Explore the book metadata dataset using Pandas.
-2. **Data Cleaning:** Clean the dataset and filter out books with insufficient descriptions.
-3. **Text Preparation:** Combine each book's ISBN-13 with its description.
-4. **Data Export:** Save the cleaned metadata and tagged descriptions to separate files.
-5. **Document Loading:** Load the tagged descriptions and create individual documents for each book.
-6. **Embedding Generation:** Convert book descriptions into numerical representations using a local embedding model.
-7. **Vector Database:** Store the documents and embeddings in ChromaDB.
-8. **Semantic Search:** Retrieve books whose descriptions are semantically similar to a user's natural-language query.
-
-### Example Query
-
-```python
-query = "A story about friendship, magic, and adventure"
-
-results = "db_books.similarity_search(query, k=5)"
-```
-
-This query retrieves up to five book descriptions related to the requested themes.
-
-Unlike a simple keyword search, semantic search can identify relevant descriptions even when they use different words to express similar ideas.
-
-## 🧠 Local Embeddings
-
-This project uses the following model:
+The project uses the pretrained model:
 
 `sentence-transformers/all-MiniLM-L6-v2`
 
-The model is integrated through LangChain's `HuggingFaceEmbeddings` and generates embeddings locally.
+The model generates vector embeddings locally, avoiding the need for a paid OpenAI API for the current semantic-search implementation.
 
-This approach avoids paid OpenAI API calls for the current embedding and semantic-retrieval workflow.
+## ✅ Completed Work
 
-The initial model download requires an internet connection. Once downloaded, the model can generate embeddings locally without requiring an OpenAI API key.
+### 1. Data Exploration and Cleaning
 
-## 📂 Project Files
+- Inspected the dataset's columns and data types.
+- Explored book ratings and other numerical variables.
+- Examined missing values.
+- Investigated relationships between numerical variables using Spearman correlation.
+- Filtered out books with descriptions containing 25 words or fewer.
+- Created a `title_and_subtitle` field that uses the title alone when a subtitle is unavailable.
+- Created a `tagged_description` field combining each book's ISBN-13 identifier and description.
+- Exported the cleaned dataset to `books_cleaned.csv`.
+- Exported the tagged descriptions to `tagged_description.txt`.
+
+### 2. Local Embeddings
+
+Integrated a pretrained Sentence Transformers model through LangChain's Hugging Face embedding integration.
+
+The embedding model converts book descriptions into numerical vectors that represent semantic meaning, enabling retrieval based on conceptual relevance rather than exact keyword matches.
+
+### 3. ChromaDB Vector Database
+
+- Created LangChain documents from the tagged descriptions.
+- Built a ChromaDB vector database using the local embedding model.
+- Indexed all **5,197 cleaned book documents**.
+- Tested similarity searches using natural-language queries.
+- Confirmed that the database returns relevant book descriptions.
+
+### 4. Semantic Book Search
+
+Implemented semantic search using ChromaDB's similarity-search functionality.
+
+Example query:
+
+```python
+# Example query — replace this string with your own search.
+query = "A story about friendship, magic, and adventure"
+
+# Example search — requires db_books to be initialized.
+# results = db_books.similarity_search(query, k=5)
+```
+
+The system retrieves book descriptions that are semantically relevant to the query.
+
+### 5. Book Recommendation Function
+
+Developed a `recommend_books()` function that connects semantic-search results to the original Pandas metadata.
+
+The function:
+
+- Accepts a natural-language query.
+- Retrieves relevant books from ChromaDB.
+- Extracts ISBN-13 identifiers from search results.
+- Matches identifiers against the cleaned dataset.
+- Preserves ChromaDB's relevance ranking.
+- Returns selected metadata in a Pandas DataFrame.
+
+The returned information includes:
+
+- ISBN-13
+- Title
+- Authors
+- Categories
+- Description
+- Thumbnail
+- Average rating
+
+Example usage:
+
+```python
+# Example call — requires the recommend_books() function to be defined.
+# recommendations = recommend_books(
+#     query="A fantasy story about magic and friendship",
+#     k=5
+# )
+```
+
+### 6. Minimum-Rating Filter
+
+Extended the recommendation function with an optional `min_rating` parameter.
+
+Example usage:
+
+```python
+# Example: Recommend up to five books rated 4.0 or higher.
+# recommendations = recommend_books(
+#     query="A fantasy story about magic and friendship",
+#     k=5,
+#     min_rating=4.0
+# )
+```
+
+A stricter rating requirement can also be used:
+
+```python
+# Example: Recommend books rated 4.5 or higher.
+# recommendations = recommend_books(
+#     query="A fantasy story about magic and friendship",
+#     k=5,
+#     min_rating=4.5
+# )
+```
+
+The rating filter is optional. When `min_rating=None`, the function does not filter recommendations by rating.
+
+The function retrieves up to five times the requested number of candidates to improve the chances of finding enough books that satisfy the rating requirement. Consequently, it may return fewer than the requested number of books when too few candidates qualify.
+
+## ⚙️ Current Recommendation Workflow
+
+The current system follows this workflow:
+
+1. The user enters a natural-language query.
+2. The embedding model represents the query for semantic search.
+3. ChromaDB retrieves books with semantically similar descriptions.
+4. ISBN-13 identifiers connect search results to the cleaned Pandas dataset.
+5. The recommendation function retrieves the relevant metadata.
+6. An optional minimum-rating filter removes books below the requested threshold.
+7. The function returns recommendations in semantic relevance order.
+
+## 📁 Project Files
 
 | File | Description |
 |---|---|
-| `books_cleaned.csv` | Cleaned book metadata for retrieving book information |
-| `tagged_description.txt` | Book descriptions prefixed with ISBN-13 identifiers, used for semantic search |
-| `data-exploration.ipynb` | Notebook for exploring and preparing the dataset, if present |
-| Semantic-search notebook | Notebook for loading documents, generating embeddings, building ChromaDB, and testing retrieval |
+| `data-exploration.ipynb` | Notebook containing data exploration, preprocessing, embeddings, vector search, and recommendation experiments |
+| `books_cleaned.csv` | Cleaned book metadata |
+| `tagged_description.txt` | ISBN-tagged book descriptions used to create the vector database |
+| `README.md` | Project documentation |
+| `.gitignore` | Specifies files and directories Git should ignore |
 
-File names and notebook organization may change as the project develops.
+The vector database is generated during development and may need to be rebuilt if its persisted files are not included in the repository.
 
-## 📦 Installation
+## 🚀 Setup and Installation
 
-Install the required Python packages in your project environment:
+### Prerequisites
+
+- Python
+- Jupyter Notebook
+- Git
+
+### 1. Clone the Repository
 
 ```bash
-python -m pip install pandas jupyter langchain-community langchain-core langchain-huggingface langchain-chroma sentence-transformers
+git clone <your-repository-url>
+cd book-recommender
 ```
 
-If you're using PyCharm, make sure your notebook kernel uses the same Python interpreter or virtual environment where the packages are installed.
+Replace `<your-repository-url>` with the URL of your GitHub repository.
 
-## ⚠️ Current Limitations
+### 2. Create a Virtual Environment
 
-- The system retrieves relevant book descriptions but does not yet present fully developed book recommendations.
-- Retrieved ISBNs have not yet been integrated into a complete recommendation function.
-- Recommendation ranking and presentation logic are still in development.
-- A user-facing interface has not yet been implemented.
-- The current ChromaDB setup uses an in-memory collection unless persistence is configured separately.
-- Recommendation relevance and overall system performance still require further testing.
+```bash
+python -m venv .venv
+```
+
+On Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install pandas jupyter langchain-community langchain-core langchain-huggingface langchain-chroma sentence-transformers
+```
+
+### 4. Launch Jupyter Notebook
+
+```bash
+jupyter notebook
+```
+
+Open `data-exploration.ipynb` and execute the notebook cells in order.
+
+**Note:** The first embedding-model initialization may require an internet connection to download the pretrained model. Subsequent runs can use the locally cached model.
+
+The notebook and generated data files must be available at the paths expected by the code.
+
+## 🔄 Current Project Status
+
+**Status: Working semantic-search and metadata-based recommendation prototype.**
+
+| Component | Status |
+|---|---|
+| Dataset exploration | Completed |
+| Data cleaning and preprocessing | Completed |
+| Cleaned CSV and tagged-description exports | Completed |
+| Local embedding model integration | Completed |
+| ChromaDB indexing | Completed |
+| Semantic similarity search | Working |
+| ISBN-based metadata retrieval | Working |
+| Recommendation function | Working |
+| Optional minimum-rating filter | Implemented and tested |
+| Category filtering | Planned |
+| Publication-year filtering | Planned |
+| Page-count filtering | Planned |
+| Combined recommendation filters | Planned |
+| User interface | Planned |
+| End-to-end application | In development |
 
 ## 🗺️ Roadmap
 
-- [x] Explore and clean the book metadata dataset.
-- [x] Prepare ISBN-tagged book descriptions.
-- [x] Generate local text embeddings.
-- [x] Build a ChromaDB vector database.
-- [x] Test semantic search with natural-language queries.
-- [ ] Rebuild and verify the corrected document collection.
-- [ ] Connect retrieved ISBNs to the corresponding book metadata.
-- [ ] Implement a reusable book recommendation function.
-- [ ] Improve recommendation ranking and filtering.
-- [ ] Continue implementing the recommendation pipeline.
-- [ ] Build a user-friendly interface.
-- [ ] Test and evaluate recommendation quality.
+### Phase 1: Data Preparation
 
-## 🎯 Learning Objectives
+- [x] Explore the dataset.
+- [x] Clean book metadata and descriptions.
+- [x] Generate tagged descriptions.
+- [x] Export the cleaned dataset.
 
-This project is a practical learning experience focused on:
+### Phase 2: Semantic Search
 
-- Python programming
-- Data cleaning and manipulation with Pandas
+- [x] Integrate a local sentence embedding model.
+- [x] Convert book descriptions into LangChain documents.
+- [x] Build the ChromaDB vector database.
+- [x] Test semantic similarity search.
+
+### Phase 3: Recommendation Logic
+
+- [x] Connect search results to book metadata using ISBN-13.
+- [x] Implement the `recommend_books()` function.
+- [x] Preserve semantic relevance ranking.
+- [x] Add an optional minimum-rating filter.
+- [ ] Add category filtering.
+- [ ] Add publication-year filtering.
+- [ ] Add page-count filtering.
+- [ ] Support combinations of filters.
+- [ ] Improve recommendation quality and evaluation.
+
+### Phase 4: User Experience
+
+- [ ] Design a user-friendly interface.
+- [ ] Display book covers and relevant metadata.
+- [ ] Allow users to search using natural language.
+- [ ] Add controls for recommendation filters.
+- [ ] Integrate the recommendation function into the interface.
+
+### Phase 5: Evaluation and Improvements
+
+- [ ] Test the system using different types of queries.
+- [ ] Evaluate recommendation relevance.
+- [ ] Improve handling of empty or insufficient results.
+- [ ] Optimize retrieval and response time.
+- [ ] Document limitations and future improvements.
+
+## 📚 Learning Objectives
+
+This project provides practical experience with:
+
+- Data cleaning and exploratory data analysis
+- Pandas DataFrame operations
 - Natural-language processing
-- Text embeddings and semantic similarity
-- Vector databases and information retrieval
-- Building applications with LangChain
-- Integrating machine-learning components into a usable application
+- Sentence embeddings
+- Vector databases
+- Semantic similarity search
+- LangChain document processing
+- Metadata-based recommendation filtering
+- Building an end-to-end machine learning application
 
-## 📖 Dataset
+## 🔮 Future Possibilities
 
-The project uses the **7k Books with Metadata** dataset from Kaggle.
+Potential future improvements include:
 
-Dataset: [7k Books with Metadata — Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
+- More advanced recommendation strategies
+- Improved ranking using multiple metadata signals
+- Better book discovery through combined semantic and metadata filters
+- Recommendation explanations
+- A web-based interface
+- Evaluation using recommendation metrics
 
-## 📌 Project Status
+These are future possibilities rather than currently implemented features.
 
-The project has progressed from data exploration and preparation to a working semantic-search prototype using local embeddings and ChromaDB.
+## 👨‍💻 Project Status and Development
 
-The next milestone is to connect search results to complete book metadata and implement the core recommendation function.
-
-The long-term goal is to build a book recommendation application that accepts natural-language preferences and returns relevant books from the dataset.
+This is an actively developed learning and portfolio project. Its current focus is building a functional semantic book recommendation system using local embeddings and a vector database.
